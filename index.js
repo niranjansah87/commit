@@ -4,37 +4,65 @@ import simpleGit from "simple-git";
 import random from "random";
 
 const path = "./data.json";
+const git = simpleGit();
 
-const markCommit = (x, y) => {
-  const date = moment()
-    .subtract(1, "y")
-    .add(1, "d")
-    .add(x, "w")
-    .add(y, "d")
-    .format();
-
+const markCommit = (date, message, callback) => {
   const data = {
     date: date,
   };
 
   jsonfile.writeFile(path, data, () => {
-    simpleGit().add([path]).commit(date, { "--date": date }).push();
+    git.add([path])
+      .commit(message, { "--date": date }, callback);
   });
 };
 
-const makeCommits = (n) => {
-  if(n===0) return simpleGit().push();
-  const x = random.int(0, 54);
-  const y = random.int(0, 6);
-  const date = moment().subtract(1, "y").add(1, "d").add(x, "w").add(y, "d").format();
+const makeCommitsForDay = (date, numCommits, callback) => {
+  let commitsLeft = numCommits;
 
-  const data = {
-    date: date,
+  const makeNext = () => {
+    if (commitsLeft === 0) return callback();
+
+    // Generate random hour, minute, second
+    const hour = random.int(0, 23);
+    const minute = random.int(0, 59);
+    const second = random.int(0, 59);
+
+    const commitDate = moment(date)
+      .hour(hour)
+      .minute(minute)
+      .second(second)
+      .format();
+
+    markCommit(commitDate, `Commit on ${commitDate}`, () => {
+      commitsLeft--;
+      makeNext();
+    });
   };
-  console.log(date);
-  jsonfile.writeFile(path, data, () => {
-    simpleGit().add([path]).commit(date, { "--date": date },makeCommits.bind(this,--n));
-  });
+
+  makeNext();
 };
 
-makeCommits(250);
+const makeCommits = async () => {
+  const startDate = moment("2024-01-01");
+  const endDate = moment("2024-12-31");
+
+  const days = endDate.diff(startDate, "days") + 1;
+
+  const makeDayCommits = (dayIndex) => {
+    if (dayIndex >= days) {
+      return git.push();
+    }
+
+    const date = moment("2024-01-01").add(dayIndex, "days");
+    const numCommits = random.int(5, 10); // <-- Random commits per day between 5 and 10
+
+    makeCommitsForDay(date, numCommits, () => {
+      makeDayCommits(dayIndex + 1);
+    });
+  };
+
+  makeDayCommits(0);
+};
+
+makeCommits();
