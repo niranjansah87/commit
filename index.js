@@ -45,7 +45,7 @@ const makeCommitsForDay = (date, numCommits, callback) => {
 
 const makeCommits = async () => {
   const startDate = moment("2023-01-01");
-  const endDate = moment("2023-12-31");
+  const endDate = moment("2023-08-31");
 
   const days = endDate.diff(startDate, "days") + 1;
 
