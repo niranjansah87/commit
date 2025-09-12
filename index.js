@@ -44,8 +44,8 @@ const makeCommitsForDay = (date, numCommits, callback) => {
 };
 
 const makeCommits = async () => {
-  const startDate = moment("2023-01-01");
-  const endDate = moment("2023-08-31");
+  const startDate = moment("2025-09-01");
+  const endDate = moment("2025-09-05");
 
   const days = endDate.diff(startDate, "days") + 1;
 
@@ -54,7 +54,7 @@ const makeCommits = async () => {
       return git.push();
     }
 
-    const date = moment("2023-01-01").add(dayIndex, "days");
+    const date = moment("2025-09-04").add(dayIndex, "days");
     const numCommits = random.int(5, 10); // <-- Random commits per day between 5 and 10
 
     makeCommitsForDay(date, numCommits, () => {
